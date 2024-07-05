@@ -67,12 +67,7 @@
             <artifactId>htmlunit</artifactId>
             <version>2.48.0</version>
         </dependency>
-        <dependency>
-            <groupId>ua.com.valexa</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>ua.com.valexa</groupId>
             <artifactId>cdp-common</artifactId>
