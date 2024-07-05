@@ -169,9 +169,9 @@ public class OcService {
 
         String url = "https://opencorporates.com/companies/" +
                 jurisdiction +
-                "?branch=false&commit=Go&mode=phrase_prefix&nonprofit=&order=&q=" +
+                "?utf8=%E2%9C%93&q=" +
                 ocRequest.getCompanyName().replace(" ", "+") +
-                "&type=companies&user=true&utf8=%E2%9C%93";
+                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=false&inactive=false&nonprofit=&order=";
         log.info("Searching URL: {}", url);
         return url;
     }
@@ -197,7 +197,8 @@ public class OcService {
 
     private HtmlPage getCompanyPage(HtmlListItem item) throws IOException {
         log.debug("Getting url for company page");
-        HtmlAnchor anchor = item.getFirstByXPath(".//a[@class='company_search_result']");
+//        HtmlAnchor anchor = item.getFirstByXPath(".//a[@class='company_search_result']");
+        HtmlAnchor anchor = (HtmlAnchor) item.getByXPath("/html/body/div[2]/div[2]/div[1]/div[2]/ul/li/a[2]").get(0);
         String url = "https://opencorporates.com" + anchor.getHrefAttribute();
         return client.getPage(url);
     }

@@ -14,7 +14,7 @@ public class EtiProfile {
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    private Long id;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String orgName;

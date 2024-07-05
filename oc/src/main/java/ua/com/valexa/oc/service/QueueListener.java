@@ -6,7 +6,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import ua.com.valexa.cdpcommon.dto.EtiExtractRequest;
 import ua.com.valexa.cdpcommon.dto.EtiProfileDto;
@@ -36,42 +38,67 @@ public class QueueListener {
     @Autowired
     OcCompanyProfileRepository ocCompanyProfileRepository;
 
-    ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
+    ExecutorService taskExecutor = Executors.newFixedThreadPool(3);
+
+
+//    @Bean
+//    public TaskExecutor taskExecutor() {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(10);
+//        executor.setMaxPoolSize(20);
+//        executor.setQueueCapacity(100);
+//        executor.setThreadNamePrefix("OcServiceExecutor-");
+//        executor.initialize();
+//        return executor;
+//    }
+
+
+    private static final ThreadLocal<OcService> threadLocalOcService = ThreadLocal.withInitial(() -> new OcService());
+    private String getFirstNonEmptyState(EtiProfileDto dto) {
+        if (dto.getIncState() != null && !dto.getIncState().isEmpty()) {
+            return dto.getIncState();
+        }
+        if (dto.getBusinessState() != null && !dto.getBusinessState().isEmpty()) {
+            return dto.getBusinessState();
+        }
+        if (dto.getMailingState() != null && !dto.getMailingState().isEmpty()) {
+            return dto.getMailingState();
+        }
+        return null; // or a default value if none of the states are non-null and non-empty
+    }
+
 
 
     @RabbitListener(queues = "#{getQueueOcRequest}")
     public void receiveDownloaderMessage(EtiProfileDto dto) {
-
-
-
-//        taskExecutor.submit(() -> {
-//            OcRequest request = new OcRequest();
-//            request.setCompanyName(dto.getOrgName());
-//            request.setState(dto.getIncState());
-//            request.setMaxRetries(3);
-//
-//            List<OcCompanyProfile> res = ocService.search(request);
-//
-//            if (res.size() > 0) {
-//                System.out.println(res);
-//                ocCompanyProfileRepository.saveAll(res);
-//            }
-//
-//            System.out.println(dto);
-//        });
-
         OcRequest request = new OcRequest();
         request.setCompanyName(dto.getOrgName());
-        request.setState(dto.getIncState());
-        request.setMaxRetries(3);
-        List<OcCompanyProfile> res =  ocService.search(request);
 
-        if (res.size() > 0){
-            System.out.println(res);
-            ocCompanyProfileRepository.saveAll(res);
-        }
-        System.out.println(dto);
+        request.setState(getFirstNonEmptyState(dto));
+//        request.setState(dto.getBusinessState());
+//        request.setState(dto.getMailingState());
 
+
+
+        request.setMaxRetries(1);
+
+        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> {
+            OcService ocService = threadLocalOcService.get();
+            return ocService.search(request);
+        }, taskExecutor);
+
+        cfuture.thenAcceptAsync(ocCompanyProfiles -> {
+            saveProfiles(ocCompanyProfiles);
+        });
+
+//        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> ocService.search(request), taskExecutor);
+//        cfuture.thenAcceptAsync(ocCompanyProfiles -> {
+//            saveProfiles(ocCompanyProfiles);
+//        });
+    }
+
+    private void saveProfiles(List<OcCompanyProfile> profiles) {
+        ocCompanyProfileRepository.saveAll(profiles);
     }
 
 }
