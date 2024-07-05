@@ -1,0 +1,9 @@
+FROM openjdk:17-slim
+WORKDIR /app
+
+ENV JAVA_OPTS="-Xms256m -Xmx2G -XX:+ExitOnOutOfMemoryError  -Djava.security.egd=file:///dev/./urandom -Dsecurerandom.source=file:///dev/./urandom"
+
+ARG JAR_FILE
+COPY ${JAR_FILE} app.jar
+
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar ${0} ${@}"]#

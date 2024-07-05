@@ -1,0 +1,184 @@
+version: '3.8'
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - afs-network
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5417:${DB_PORT}"
+    networks:
+      - afs-network
+
+
+
+  api-server:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=./api-server/target/api-server*.jar
+    environment:
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    ports:
+      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=./api-gateway/target/api-gateway*.jar
+    environment:
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - API_GATEWAY_PORT=${API_GATEWAY_PORT}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    ports:
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+      - api-server
+
+  eti-harvester:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=eti-harvester/target/eti-harvester*.jar
+    environment:
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - QUEUE_ETI_EXTRACTOR=${QUEUE_ETI_EXTRACTOR}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+      - rabbitmq
+      - api-server
+      - api-gateway
+
+  eti-extractor:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=eti-extractor/target/eti-extractor*.jar
+    environment:
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - QUEUE_ETI_EXTRACTOR=${QUEUE_ETI_EXTRACTOR}
+      - QUEUE_ETI_SAVER=${QUEUE_ETI_SAVER}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+      - rabbitmq
+      - api-server
+      - api-gateway
+
+  eti-saver:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=eti-saver/target/eti-saver*.jar
+    environment:
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - QUEUE_ETI_EXTRACTOR=${QUEUE_ETI_EXTRACTOR}
+      - QUEUE_ETI_SAVER=${QUEUE_ETI_SAVER}
+      - QUEUE_OC_REQUEST=${QUEUE_OC_REQUEST}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+      - rabbitmq
+      - api-server
+      - api-gateway
+
+  oc:
+    build:
+      context: .
+      dockerfile: ./config/docker/Dockerfile_jar
+      args:
+        - JAR_FILE=oc/target/oc*.jar
+    environment:
+      - OC_ACCOUNTS_FILE=${OC_ACCOUNTS_FILE}
+      - API_SERVER_HOST=${API_SERVER_HOST}
+      - API_SERVER_PORT=${API_SERVER_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - QUEUE_OC_REQUEST=${QUEUE_OC_REQUEST}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - LOG_PATTERN=${LOG_PATTERN}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
+    networks:
+      - afs-network
+    depends_on:
+      - postgres
+      - rabbitmq
+      - api-server
+      - api-gateway
+
+networks:
+  afs-network:
+    driver: bridge
