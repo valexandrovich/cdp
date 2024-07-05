@@ -154,6 +154,7 @@ services:
       dockerfile: ./config/docker/Dockerfile_jar
       args:
         - JAR_FILE=oc/target/oc*.jar
+        - OC_ACC_FILE=./config/oc_accs.csv
     environment:
       - OC_ACCOUNTS_FILE=${OC_ACCOUNTS_FILE}
       - API_SERVER_HOST=${API_SERVER_HOST}
