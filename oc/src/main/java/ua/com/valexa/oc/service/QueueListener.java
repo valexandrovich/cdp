@@ -44,33 +44,33 @@ public class QueueListener {
 
 
 
-        taskExecutor.submit(() -> {
-            OcRequest request = new OcRequest();
-            request.setCompanyName(dto.getOrgName());
-            request.setState(dto.getIncState());
-            request.setMaxRetries(3);
-
-            List<OcCompanyProfile> res = ocService.search(request);
-
-            if (res.size() > 0) {
-                System.out.println(res);
-                ocCompanyProfileRepository.saveAll(res);
-            }
-
-            System.out.println(dto);
-        });
-
-//        OcRequest request = new OcRequest();
-//        request.setCompanyName(dto.getOrgName());
-//        request.setState(dto.getIncState());
-//        request.setMaxRetries(3);
-//        List<OcCompanyProfile> res =  ocService.search(request);
+//        taskExecutor.submit(() -> {
+//            OcRequest request = new OcRequest();
+//            request.setCompanyName(dto.getOrgName());
+//            request.setState(dto.getIncState());
+//            request.setMaxRetries(3);
 //
-//        if (res.size() > 0){
-//            System.out.println(res);
-//            ocCompanyProfileRepository.saveAll(res);
-//        }
-//        System.out.println(dto);
+//            List<OcCompanyProfile> res = ocService.search(request);
+//
+//            if (res.size() > 0) {
+//                System.out.println(res);
+//                ocCompanyProfileRepository.saveAll(res);
+//            }
+//
+//            System.out.println(dto);
+//        });
+
+        OcRequest request = new OcRequest();
+        request.setCompanyName(dto.getOrgName());
+        request.setState(dto.getIncState());
+        request.setMaxRetries(3);
+        List<OcCompanyProfile> res =  ocService.search(request);
+
+        if (res.size() > 0){
+            System.out.println(res);
+            ocCompanyProfileRepository.saveAll(res);
+        }
+        System.out.println(dto);
 
     }
 
