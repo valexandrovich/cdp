@@ -179,7 +179,8 @@ public class OcService {
                 jurisdiction +
                 "?utf8=%E2%9C%93&q=" +
                 ocRequest.getCompanyName().replace(" ", "+") +
-                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=false&inactive=false&nonprofit=&order=";
+//                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=false&inactive=false&nonprofit=&order=";
+                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=&inactive=&nonprofit=&order=";
         log.info("Searching URL: {}", url);
         return url;
     }
