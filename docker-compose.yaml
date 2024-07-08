@@ -20,9 +20,9 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5417:${DB_PORT}"
-#    volumes:
-#      - ./config/postgresql.conf:/usr/share/postgresql/postgresql.conf
-#    command: ["postgres", "-c", "config_file=/usr/share/postgresql/postgresql.conf"]
+    volumes:
+      - ./config/postgresql.conf:/usr/share/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/usr/share/postgresql/postgresql.conf"]
     networks:
       - cdp-network
 

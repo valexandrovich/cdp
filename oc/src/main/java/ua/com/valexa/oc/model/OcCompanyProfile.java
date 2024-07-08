@@ -30,10 +30,14 @@ public class OcCompanyProfile {
     private String directors;
     private String registryPage;
 
+    private String searchUrl;
+
     @Override
     public String toString() {
         return "OcCompanyProfile{" +
-                "companyNumber='" + companyNumber + '\'' +
+                "id=" + id +
+                ", irsEin='" + irsEin + '\'' +
+                ", companyNumber='" + companyNumber + '\'' +
                 ", incorparatedDate='" + incorparatedDate + '\'' +
                 ", agentName='" + agentName + '\'' +
                 ", agentAddress='" + agentAddress + '\'' +
@@ -41,6 +45,7 @@ public class OcCompanyProfile {
                 ", jurisdiction='" + jurisdiction + '\'' +
                 ", directors='" + directors + '\'' +
                 ", registryPage='" + registryPage + '\'' +
+                ", searchUrl='" + searchUrl + '\'' +
                 '}';
     }
 }

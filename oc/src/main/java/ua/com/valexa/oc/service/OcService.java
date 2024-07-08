@@ -84,6 +84,9 @@ public class OcService {
     public List<OcCompanyProfile> search(OcRequest ocRequest) {
         log.info("Got request: {}", ocRequest);
         List<OcCompanyProfile> profiles = new ArrayList<>();
+
+        OcCompanyProfile failedProfile = new OcCompanyProfile();
+
         int currentTry = 1;
         while (currentTry <= ocRequest.getMaxRetries()) {
             try {
@@ -96,6 +99,10 @@ public class OcService {
                 client.getOptions().setProxyConfig(proxyConfig);
 
                 String searchUrl = buildSearchUrl(ocRequest);
+                failedProfile.setId(UUID.randomUUID());
+                failedProfile.setSearchUrl(searchUrl);
+                failedProfile.setIrsEin(ocRequest.getIrsEin());
+
 
                 HtmlPage page = client.getPage(searchUrl);
 
@@ -120,11 +127,12 @@ public class OcService {
 
 
                 System.out.println("RES: " + profiles.size());
-
                 currentTry = ocRequest.getMaxRetries() + 1;
+                profiles.stream().forEach(p -> p.setSearchUrl(searchUrl));
                 return profiles;
 
             } catch (Exception e) {
+                profiles.add(failedProfile);
                 currentTry++;
                 log.error(e.getMessage());
             }
