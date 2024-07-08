@@ -10,7 +10,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - afs-network
+      - cdp-network
 
   postgres:
     image: postgres:latest
@@ -20,8 +20,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5417:${DB_PORT}"
+#    volumes:
+#      - ./config/postgresql.conf:/usr/share/postgresql/postgresql.conf
+#    command: ["postgres", "-c", "config_file=/usr/share/postgresql/postgresql.conf"]
     networks:
-      - afs-network
+      - cdp-network
 
 
 
@@ -40,7 +43,7 @@ services:
     ports:
       - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     networks:
-      - afs-network
+      - cdp-network
     depends_on:
       - postgres
 
@@ -60,7 +63,7 @@ services:
     ports:
       - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     networks:
-      - afs-network
+      - cdp-network
     depends_on:
       - postgres
       - api-server
@@ -83,7 +86,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
     networks:
-      - afs-network
+      - cdp-network
     depends_on:
       - postgres
       - rabbitmq
@@ -109,7 +112,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
     networks:
-      - afs-network
+      - cdp-network
     depends_on:
       - postgres
       - rabbitmq
@@ -141,7 +144,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
     networks:
-      - afs-network
+      - cdp-network
     depends_on:
       - postgres
       - rabbitmq
@@ -173,7 +176,14 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
       - LOG_LEVEL_ROOT=${LOG_LEVEL_ROOT}
     networks:
-      - afs-network
+      - cdp-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 2
+        delay: 10s
     depends_on:
       - postgres
       - rabbitmq
@@ -181,5 +191,5 @@ services:
       - api-gateway
 
 networks:
-  afs-network:
+ cdp-network:
     driver: bridge
