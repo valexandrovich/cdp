@@ -1,6 +1,7 @@
 package ua.com.valexa.oc.model;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -30,6 +31,7 @@ public class OcCompanyProfile {
     private String directors;
     private String registryPage;
 
+    @Column(columnDefinition = "TEXT")
     private String searchUrl;
 
     @Override
