@@ -125,13 +125,16 @@ public class OcService {
                     profiles.add(extractData(companyPage));
                 }
 
-
+                int ps = profiles.size();
                 System.out.println("RES: " + profiles.size());
                 currentTry = ocRequest.getMaxRetries() + 1;
                 profiles.stream().forEach(p -> p.setSearchUrl(searchUrl));
+                profiles.stream().forEach(p -> p.setCountResults(ps));
                 return profiles;
 
             } catch (Exception e) {
+                failedProfile.setError(e.getMessage());
+                failedProfile.setCountResults(0);
                 profiles.add(failedProfile);
                 currentTry++;
                 log.error(e.getMessage());

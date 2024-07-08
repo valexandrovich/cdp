@@ -34,6 +34,11 @@ public class OcCompanyProfile {
     @Column(columnDefinition = "TEXT")
     private String searchUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String error;
+
+    private Integer countResults;
+
     @Override
     public String toString() {
         return "OcCompanyProfile{" +
