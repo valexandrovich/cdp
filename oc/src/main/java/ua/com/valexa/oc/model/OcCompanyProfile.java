@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -38,6 +39,8 @@ public class OcCompanyProfile {
     private String error;
 
     private Integer countResults;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Override
     public String toString() {
