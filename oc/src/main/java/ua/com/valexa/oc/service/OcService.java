@@ -92,11 +92,11 @@ public class OcService {
             try {
                 OcUserProfile userProfile = OcAccountService.getRandomProfile();
 
-                DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) client.getCredentialsProvider();
-                credentialsProvider.addCredentials(userProfile.getProxyUser(), userProfile.getProxyPassword());
+//                DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) client.getCredentialsProvider();
+//                credentialsProvider.addCredentials(userProfile.getProxyUser(), userProfile.getProxyPassword());
 
-                ProxyConfig proxyConfig = new ProxyConfig(userProfile.getProxyHost(), userProfile.getProxyPort(), "http", false);
-                client.getOptions().setProxyConfig(proxyConfig);
+//                ProxyConfig proxyConfig = new ProxyConfig(userProfile.getProxyHost(), userProfile.getProxyPort(), "http", false);
+//                client.getOptions().setProxyConfig(proxyConfig);
 
                 String searchUrl = buildSearchUrl(ocRequest);
                 failedProfile.setId(UUID.randomUUID());
