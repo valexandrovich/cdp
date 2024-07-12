@@ -35,8 +35,6 @@ public class QueueListener {
     @Autowired
     OcService ocService;
 
-    @Autowired
-    OcSelenium ocSelenium;
 
     @Autowired
     OcCompanyProfileRepository ocCompanyProfileRepository;
