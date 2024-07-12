@@ -36,9 +36,12 @@ public class QueueListener {
     OcService ocService;
 
     @Autowired
+    OcSelenium ocSelenium;
+
+    @Autowired
     OcCompanyProfileRepository ocCompanyProfileRepository;
 
-    ExecutorService taskExecutor = Executors.newFixedThreadPool(3);
+    ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
 
 
 //    @Bean
@@ -82,14 +85,20 @@ public class QueueListener {
 
         request.setMaxRetries(1);
 
-        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> {
-            OcService ocService = threadLocalOcService.get();
-            return ocService.search(request);
-        }, taskExecutor);
+//        OcService ocService1 = new OcService();
+        OcSelenium selenium = new OcSelenium();
+        List<OcCompanyProfile> profiles =  ocService.search(request);
+        saveProfiles(profiles);
 
-        cfuture.thenAcceptAsync(ocCompanyProfiles -> {
-            saveProfiles(ocCompanyProfiles);
-        });
+//        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> {
+//            OcService ocService = threadLocalOcService.get();
+////            return ocService.search(request);
+//            return ocSelenium.search(request);
+//        }, taskExecutor);
+//
+//        cfuture.thenAcceptAsync(ocCompanyProfiles -> {
+//            saveProfiles(ocCompanyProfiles);
+//        });
 
 //        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> ocService.search(request), taskExecutor);
 //        cfuture.thenAcceptAsync(ocCompanyProfiles -> {

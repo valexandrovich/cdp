@@ -92,8 +92,8 @@ public class OcService {
             try {
                 OcUserProfile userProfile = OcAccountService.getRandomProfile();
 
-                DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) client.getCredentialsProvider();
-                credentialsProvider.addCredentials(userProfile.getProxyUser(), userProfile.getProxyPassword());
+//                DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) client.getCredentialsProvider();
+//                credentialsProvider.addCredentials(userProfile.getProxyUser(), userProfile.getProxyPassword());
 
                 ProxyConfig proxyConfig = new ProxyConfig(userProfile.getProxyHost(), userProfile.getProxyPort(), "http", false);
                 client.getOptions().setProxyConfig(proxyConfig);
@@ -102,6 +102,10 @@ public class OcService {
                 failedProfile.setId(UUID.randomUUID());
                 failedProfile.setSearchUrl(searchUrl);
                 failedProfile.setIrsEin(ocRequest.getIrsEin());
+
+                failedProfile.setOcAcc(userProfile.getUserName());
+                failedProfile.setProxyHost(userProfile.getProxyHost());
+                failedProfile.setProxyPort(userProfile.getProxyPort());
 
 
                 HtmlPage page = client.getPage(searchUrl);
@@ -130,6 +134,11 @@ public class OcService {
                 currentTry = ocRequest.getMaxRetries() + 1;
                 profiles.stream().forEach(p -> p.setSearchUrl(searchUrl));
                 profiles.stream().forEach(p -> p.setCountResults(ps));
+
+                profiles.stream().forEach(p -> p.setOcAcc(userProfile.getUserName()));
+                profiles.stream().forEach(p -> p.setProxyHost(userProfile.getProxyHost()));
+                profiles.stream().forEach(p -> p.setProxyPort(userProfile.getProxyPort()));
+
                 return profiles;
 
             } catch (Exception e) {
@@ -165,7 +174,6 @@ public class OcService {
         passwordInput.setValueAttribute(password);
         HtmlPage resultPage = submitButton.click();
         client.waitForBackgroundJavaScript(3000);
-
     }
 
     private String buildSearchUrl(OcRequest ocRequest) {

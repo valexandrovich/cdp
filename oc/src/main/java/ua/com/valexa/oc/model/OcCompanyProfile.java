@@ -40,6 +40,10 @@ public class OcCompanyProfile {
 
     private Integer countResults;
 
+    private String ocAcc;
+    private String proxyHost;
+    private Integer proxyPort;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Override
