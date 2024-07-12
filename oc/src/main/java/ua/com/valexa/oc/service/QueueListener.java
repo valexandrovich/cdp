@@ -86,7 +86,7 @@ public class QueueListener {
         request.setMaxRetries(1);
 
 //        OcService ocService1 = new OcService();
-        OcSelenium selenium = new OcSelenium();
+//        OcSelenium selenium = new OcSelenium();
         List<OcCompanyProfile> profiles =  ocService.search(request);
         saveProfiles(profiles);
 
