@@ -81,6 +81,68 @@ public class OcService {
         });
     }
 
+
+    public List<OcCompanyProfile> search(OcRequest ocRequest, OcUserProfile profile) {
+        log.info("Got request: {}", ocRequest);
+        List<OcCompanyProfile> profiles = new ArrayList<>();
+
+
+        int currentTry = 1;
+        while (currentTry <= ocRequest.getMaxRetries()) {
+            try {
+                OcUserProfile userProfile = profile;
+
+                DefaultCredentialsProvider credentialsProvider = (DefaultCredentialsProvider) client.getCredentialsProvider();
+                credentialsProvider.addCredentials(userProfile.getProxyUser(), userProfile.getProxyPassword());
+
+                ProxyConfig proxyConfig = new ProxyConfig(userProfile.getProxyHost(), userProfile.getProxyPort(), "http", false);
+                client.getOptions().setProxyConfig(proxyConfig);
+
+                String searchUrl = buildSearchUrl(ocRequest);
+
+
+                HtmlPage page = client.getPage(searchUrl);
+
+                if (isLoginNeeded(page)) {
+                    login(userProfile);
+                    page = client.getPage(searchUrl);
+                }
+
+                List<HtmlListItem> results = getSearchResults(page);
+                List<HtmlListItem> filteredResults = fiterSearchResults(results);
+
+
+                List<HtmlPage> companyPages = new ArrayList<>();
+                for (HtmlListItem item : filteredResults) {
+                    companyPages.add(getCompanyPage(item));
+                }
+
+                profiles = new ArrayList<>();
+                for (HtmlPage companyPage : companyPages) {
+                    profiles.add(extractData(companyPage));
+                }
+
+                int ps = profiles.size();
+                System.out.println("RES: " + profiles.size());
+                currentTry = ocRequest.getMaxRetries() + 1;
+                profiles.stream().forEach(p -> p.setSearchUrl(searchUrl));
+                profiles.stream().forEach(p -> p.setCountResults(ps));
+
+                profiles.stream().forEach(p -> p.setOcAcc(userProfile.getUserName()));
+                profiles.stream().forEach(p -> p.setProxyHost(userProfile.getProxyHost()));
+                profiles.stream().forEach(p -> p.setProxyPort(userProfile.getProxyPort()));
+
+                return profiles;
+
+            } catch (Exception e) {
+                currentTry++;
+                log.error(e.getMessage());
+            }
+        }
+        return profiles;
+    }
+
+
     public List<OcCompanyProfile> search(OcRequest ocRequest) {
         log.info("Got request: {}", ocRequest);
         List<OcCompanyProfile> profiles = new ArrayList<>();
@@ -157,8 +219,14 @@ public class OcService {
 
     private boolean isLoginNeeded(HtmlPage page) {
         log.debug("Checking is login needed");
-        HtmlHeading2 paidHead = (HtmlHeading2) page.getByXPath("/html/body/div[2]/div[2]/div/h2").get(0);
-        return paidHead.asNormalizedText().startsWith("Please sign in");
+        try {
+            HtmlHeading2 paidHead = (HtmlHeading2) page.getByXPath("/html/body/div[2]/div[2]/div/h2").get(0);
+            return paidHead.asNormalizedText().startsWith("Please sign in");
+        } catch (Exception ex){
+            return false;
+        }
+
+
     }
 
     public void login(OcUserProfile ocUserProfile) throws IOException {
@@ -188,17 +256,17 @@ public class OcService {
 
         String url = "https://opencorporates.com/companies/" +
                 jurisdiction +
-                "?utf8=%E2%9C%93&q=" +
-                ocRequest.getCompanyName().replace(" ", "+") +
+                "?q=" +
+                ocRequest.getCompanyName().replace(" ", "+");
 //                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=false&inactive=false&nonprofit=&order=";
-                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=&inactive=&nonprofit=&order=";
+//                "&commit=Go&jurisdiction_code=&utf8=%E2%9C%93&commit=Go&controller=searches&action=search_companies&mode=best_fields&search_fields%5B%5D=name&search_fields%5B%5D=previous_names&search_fields%5B%5D=company_number&search_fields%5B%5D=other_company_numbers&branch=&inactive=&nonprofit=&order=";
         log.info("Searching URL: {}", url);
         return url;
     }
 
     List<HtmlListItem> getSearchResults(HtmlPage page) {
         log.debug("Getting search results");
-        HtmlUnorderedList companiesList = (HtmlUnorderedList) page.getByXPath("/html/body/div[2]/div[2]/div[1]/div[2]/ul").get(0);
+        HtmlUnorderedList companiesList = (HtmlUnorderedList) page.getElementById("companies");
         return companiesList.getByXPath(".//li");
     }
 
@@ -218,14 +286,14 @@ public class OcService {
     private HtmlPage getCompanyPage(HtmlListItem item) throws IOException {
         log.debug("Getting url for company page");
 //        HtmlAnchor anchor = item.getFirstByXPath(".//a[@class='company_search_result']");
-        HtmlAnchor anchor = (HtmlAnchor) item.getByXPath("/html/body/div[2]/div[2]/div[1]/div[2]/ul/li/a[2]").get(0);
+        HtmlAnchor anchor = (HtmlAnchor) item.getByXPath(".//a[contains(@class, 'company_search_result')]").get(0);
         String url = "https://opencorporates.com" + anchor.getHrefAttribute();
         return client.getPage(url);
     }
 
     private OcCompanyProfile extractData(HtmlPage page) {
         log.debug("Extracting data from company page");
-        HtmlDivision attributes = page.getFirstByXPath("/html/body/div[2]/div[2]/div[1]/div[1]/div");
+        HtmlDivision attributes = (HtmlDivision) page.getElementById("attributes");
         OcCompanyProfile companyProfile = new OcCompanyProfile();
         companyProfile.setId(UUID.randomUUID());
 
