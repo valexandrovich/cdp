@@ -5,19 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import ua.com.valexa.cdpcommon.dto.EtiExtractRequest;
 import ua.com.valexa.cdpcommon.dto.EtiProfileDto;
 import ua.com.valexa.cdpcommon.dto.OcRequest;
 import ua.com.valexa.oc.model.OcCompanyProfile;
 import ua.com.valexa.oc.repository.OcCompanyProfileRepository;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

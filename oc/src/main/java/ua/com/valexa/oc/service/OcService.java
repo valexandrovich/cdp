@@ -214,9 +214,6 @@ public class OcService {
         return profiles;
     }
 
-
-
-
     private boolean isLoginNeeded(HtmlPage page) {
         log.debug("Checking is login needed");
         try {
