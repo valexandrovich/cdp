@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import ua.com.valexa.cdpcommon.dto.EtiProfileDto;
 import ua.com.valexa.cdpcommon.dto.OcRequest;
 import ua.com.valexa.oc.model.OcCompanyProfile;
+import ua.com.valexa.oc.model.OcSimpleResponse;
 import ua.com.valexa.oc.repository.OcCompanyProfileRepository;
+import ua.com.valexa.oc.repository.OcSimpleResponseRepostory;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -29,11 +31,17 @@ public class QueueListener {
     @Autowired
     OcService ocService;
 
+    @Autowired
+    OCParserService ocParserService;
+
 
     @Autowired
     OcCompanyProfileRepository ocCompanyProfileRepository;
 
-    ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
+    @Autowired
+    OcSimpleResponseRepostory ocSimpleResponseRepostory;
+
+//    ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
 
 
 //    @Bean
@@ -79,8 +87,17 @@ public class QueueListener {
 
 //        OcService ocService1 = new OcService();
 //        OcSelenium selenium = new OcSelenium();
-        List<OcCompanyProfile> profiles =  ocService.search(request);
-        saveProfiles(profiles);
+//        List<OcCompanyProfile> profiles =  ocService.search(request);
+//        saveProfiles(profiles);
+
+        if (request.getCompanyName() != null && !request.getCompanyName().isEmpty()){
+            OcSimpleResponse sres = ocParserService.getData(request);
+            ocSimpleResponseRepostory.save(sres);
+        }
+
+
+
+
 
 //        CompletableFuture<List<OcCompanyProfile>> cfuture = CompletableFuture.supplyAsync(() -> {
 //            OcService ocService = threadLocalOcService.get();
