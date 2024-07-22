@@ -23,6 +23,8 @@ public class OcSimpleResponse {
     private String companyName;
     private String state;
 
+    private Boolean isNonProfit;
+
     private String searchUrl;
 
     private int searchResultCount;

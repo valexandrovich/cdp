@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.apache.commons.text.similarity.CosineSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -124,7 +125,9 @@ public class OCParserService {
                 System.out.println(res);
 
                 ocSimpleResponse.setActiveInSearchResult(res.isActiveInSearchResult);
+                ocSimpleResponse.setIsNonProfit(res.isNonProfitSpan);
                 ocSimpleResponse.setSearchResultCount(res.searchResultCount);
+
 
                 return ocSimpleResponse;
 
@@ -215,6 +218,9 @@ public class OCParserService {
                 res.setActiveInSearchResult(true);
                 break;
             }
+            if (itemContainsNonProfitSpan(item)){
+                res.setNonProfitSpan(true);
+            }
         }
         res.setSearchResultCount(results.size());
         return res;
@@ -225,12 +231,18 @@ public class OCParserService {
         return !spans.isEmpty();
     }
 
+    private boolean itemContainsNonProfitSpan(HtmlListItem item) {
+        List<HtmlSpan> spans = item.getByXPath(".//span[text()='nonprofit']");
+        return !spans.isEmpty();
+    }
+
 
     @Getter
     @Setter
     class OcSimpleRes {
         private int searchResultCount;
         private boolean isActiveInSearchResult;
+        private boolean isNonProfitSpan;
         private String error;
 
     }
