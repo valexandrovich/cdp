@@ -19,6 +19,8 @@ public class EtiProfile {
 
     private String orgName;
 
+    private String name;
+
     private String doingBusinessAs;
     private String typeOfBusiness;
 

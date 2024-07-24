@@ -39,6 +39,7 @@ public class EtiSaverService {
         }
         EtiProfile entity = new EtiProfile();
         entity.setOrgName(dto.getOrgName());
+        entity.setName(dto.getName());
         entity.setIrsEin(dto.getIrsEin());
         entity.setDoingBusinessAs(dto.getDoingBusinessAs());
         entity.setTypeOfBusiness(dto.getTypeOfBusiness());

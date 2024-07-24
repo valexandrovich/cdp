@@ -5,6 +5,10 @@ import lombok.Data;
 @Data
 public class EtiProfileDto {
     private String orgName;
+
+    private String name;
+
+
     private String irsEin;
     private String doingBusinessAs;
     private String typeOfBusiness;

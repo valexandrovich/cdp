@@ -97,6 +97,10 @@ public class EtiExtractorService {
                         profile.setOrgName(tdValue);
                     }
 
+                    if (thValue.equals("Name")) {
+                        profile.setName(tdValue);
+                    }
+
                     if (thValue.equals("IRS EIN (Taxpayer Id)") || thValue.equals("EIN (Taxpayer Id)")) {
                         profile.setIrsEin(tdValue);
                     }
