@@ -75,7 +75,13 @@ public class QueueListener {
     @RabbitListener(queues = "#{getQueueOcRequest}")
     public void receiveDownloaderMessage(EtiProfileDto dto) {
         OcRequest request = new OcRequest();
-        request.setCompanyName(dto.getOrgName());
+
+        if (dto.getOrgName() != null){
+            request.setCompanyName(dto.getOrgName());
+        } else {
+            request.setCompanyName(dto.getName());
+        }
+
 
         request.setState(getFirstNonEmptyState(dto));
 //        request.setState(dto.getBusinessState());
