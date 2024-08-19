@@ -4,6 +4,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,6 +15,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import ua.com.valexa.cdpcommon.dto.EtiExtractRequest;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +38,14 @@ public class EtiHarvesterService {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+
+    BufferedWriter write =  new BufferedWriter(new FileWriter("output2.txt"));
+
+
     AtomicInteger linksCount = new AtomicInteger(0);
+
+    public EtiHarvesterService() throws IOException {
+    }
 
     public Mono<Void> startHarvesting() {
         Mono.fromRunnable(this::collectAll)
@@ -76,12 +87,23 @@ public class EtiHarvesterService {
 
         String formattedDuration = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         System.out.println("Time taken: " + formattedDuration);
+
+        try {
+            write.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private Set<String> getLinksLevel1() {
+//        List<String> level1linksPostifx = Arrays.asList(
+//                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
+//                "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+//        );
+
         List<String> level1linksPostifx = Arrays.asList(
-                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
-                "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                 "h"
         );
 
         List<String> level1linksPostifxShort = Arrays.asList("z");
@@ -137,6 +159,12 @@ public class EtiHarvesterService {
         try {
             List<CompletableFuture<PagePair>> futures = new ArrayList<>();
             for (String l : linksLevel2) {
+
+                if ("https://eintaxid.com/companies/h/hi/".equals(l)) {
+                    // Log or handle the specific link as needed
+                    log.info("Specific link found: " + l);
+                }
+
                 CompletableFuture<PagePair> future = CompletableFuture.supplyAsync(() ->
                         getPagesCountFromLevel2(l));
                 futures.add(future);
@@ -157,6 +185,12 @@ public class EtiHarvesterService {
 
     private PagePair getPagesCountFromLevel2(String level2url) {
         int pagesCount = 0;
+
+        if ("https://eintaxid.com/companies/h/hi/".equals(level2url)) {
+            // Log or handle the specific link as needed
+            log.info("Specific link found: " + level2url);
+        }
+
         try (WebClient webClient = new WebClient()) {
             webClient.getOptions().setJavaScriptEnabled(false);
             webClient.getOptions().setCssEnabled(false);
@@ -207,6 +241,13 @@ public class EtiHarvesterService {
     }
 
     private void sendCompanyLinksFromPage(String pageLink) {
+
+        try {
+            write.write(pageLink + "\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Set<String> links = new HashSet<>();
         int maxRetries = 3;
         int retryCount = 0;
@@ -234,12 +275,19 @@ public class EtiHarvesterService {
             }
         }
         log.info("TOTAL HARVESTED: " +  linksCount.get()  + "; Trying to send: " + links.size() + " links");
+
+
+
+
         linksCount.addAndGet(links.size());
         for (String link : links){
+
+
+
+
             rabbitTemplate.convertAndSend(queueEtiExtractor, new EtiExtractRequest(link));
 
         }
-//        return links;
     }
 
     @Data
