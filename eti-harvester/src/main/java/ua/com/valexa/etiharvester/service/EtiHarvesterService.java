@@ -64,10 +64,10 @@ public class EtiHarvesterService {
         Set<String> linksLevel1 = getLinksLevel1();
         log.info("Links LEVEL 1: {}", linksLevel1.size());
 
-        Set<String> linksLevel2 = collectLinksLevel2(linksLevel1, 10);
-        log.info("Links LEVEL 2: {}", linksLevel2.size());
+//        Set<String> linksLevel2 = collectLinksLevel2(linksLevel1, 10);
+//        log.info("Links LEVEL 2: {}", linksLevel2.size());
 
-        List<PagePair> pairs =  collectPagesCountForLinksLevel2(linksLevel2);
+        List<PagePair> pairs =  collectPagesCountForLinksLevel2(linksLevel1);
         log.info("Pairs: {}", pairs.size());
 
         Set<String> pageLinks = createPageLinks(pairs);
@@ -97,14 +97,14 @@ public class EtiHarvesterService {
     }
 
     private Set<String> getLinksLevel1() {
-//        List<String> level1linksPostifx = Arrays.asList(
-//                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
-//                "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
-//        );
-
         List<String> level1linksPostifx = Arrays.asList(
-                 "h"
+                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q",
+                "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
         );
+
+//        List<String> level1linksPostifx = Arrays.asList(
+//                 "h"
+//        );
 
         List<String> level1linksPostifxShort = Arrays.asList("z");
 
